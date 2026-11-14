@@ -1,0 +1,7 @@
+# System & Environment
+.DS_Store
+Thumbs.db
+*.log
+
+# Uploads / temp (optional if dynamic)
+# assets/img/uploads/*

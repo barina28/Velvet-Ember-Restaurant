@@ -1,0 +1,47 @@
+<?php
+require_once __DIR__ . '/../includes/config.php';
+api_csrf();
+
+$t = cur_table();
+$c = cur_customer();
+if (!$t) json_out(['ok' => false, 'error' => 'Please scan the QR code on your table first.'], 403);
+if (!$c) json_out(['ok' => false, 'error' => 'identify'], 401);
+
+$in    = json_in();
+$items = $in['items'] ?? [];
+$notes = mb_substr(trim($in['notes'] ?? ''), 0, 250);
+if (!is_array($items) || !$items || count($items) > 50) json_out(['ok' => false, 'error' => 'Your cart is empty.'], 422);
+
+$qtyById = [];
+foreach ($items as $it) {
+    $id = (int)($it['id'] ?? 0);
+    $qty = max(1, min(20, (int)($it['qty'] ?? 1)));
+    if ($id > 0) $qtyById[$id] = ($qtyById[$id] ?? 0) + $qty;
+}
+if (!$qtyById) json_out(['ok' => false, 'error' => 'Your cart is empty.'], 422);
+
+// Prices always come from the database, never from the browser
+$in_sql = implode(',', array_fill(0, count($qtyById), '?'));
+$rows = q("SELECT id, name, price FROM menu_items WHERE available = 1 AND id IN ($in_sql)", array_keys($qtyById))->fetchAll();
+if (!$rows) json_out(['ok' => false, 'error' => 'Those items are not available right now.'], 422);
+
+$sub = 0;
+foreach ($rows as $r) $sub += $r['price'] * min(20, $qtyById[$r['id']]);
+[$sub, $tax, $total] = calc_totals($sub);
+
+$pdo = db();
+$pdo->beginTransaction();
+try {
+    q('INSERT INTO orders (customer_id, table_id, subtotal, tax, total, notes) VALUES (?,?,?,?,?,?)',
+      [$c['id'], $t['id'], $sub, $tax, $total, $notes]);
+    $oid = (int)$pdo->lastInsertId();
+    foreach ($rows as $r) {
+        q('INSERT INTO order_items (order_id, item_id, name, price, qty) VALUES (?,?,?,?,?)',
+          [$oid, $r['id'], $r['name'], $r['price'], $qtyById[$r['id']]]);
+    }
+    $pdo->commit();
+} catch (Throwable $ex) {
+    $pdo->rollBack();
+    json_out(['ok' => false, 'error' => 'Could not place the order, please try again.'], 500);
+}
+json_out(['ok' => true, 'order_id' => $oid, 'total' => $total]);
