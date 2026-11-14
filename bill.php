@@ -9,8 +9,8 @@ if (!empty($_GET['receipt']) && $__c) {
 }
 
 $unpaid = $pending = $paid = [];
-if ($__t && $__c) {
-    foreach (visit_orders((int)$__c['id'], (int)$__t['id']) as $o) {
+if ($__c) {
+    foreach (visit_orders((int)$__c['id'], $__t ? (int)$__t['id'] : null) as $o) {
         if ($o['status'] === 'cancelled') continue;
         if ($o['payment_status'] === 'unpaid') $unpaid[] = $o;
         elseif ($o['payment_status'] === 'cash_pending') $pending[] = $o;
@@ -32,8 +32,8 @@ $sum = fn($arr, $k) => array_sum(array_column($arr, $k));
       </div>
     <?php endif; ?>
 
-    <?php if (!$__t || !$__c): ?>
-      <div class="card-dark p-4 text-center">Scan your table's QR code and place an order to see your bill here.</div>
+    <?php if (!$__c): ?>
+      <div class="card-dark p-4 text-center">Place an order from the menu to see your bill here. <br><a href="<?= BASE ?>/index.php#menu" class="btn btn-burg mt-3">Browse Menu</a></div>
     <?php elseif (!$unpaid && !$pending && !$paid): ?>
       <div class="card-dark p-4 text-center">No orders yet. <a href="<?= BASE ?>/index.php#menu">Browse the menu</a></div>
     <?php else: ?>

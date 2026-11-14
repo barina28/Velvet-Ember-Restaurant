@@ -2,12 +2,25 @@
 require_once __DIR__ . '/../includes/config.php';
 api_csrf();
 
+ensure_orders_schema();
+
 $t = cur_table();
 $c = cur_customer();
-if (!$t) json_out(['ok' => false, 'error' => 'Please scan the QR code on your table first.'], 403);
 if (!$c) json_out(['ok' => false, 'error' => 'identify'], 401);
 
 $in    = json_in();
+$order_type = in_array($in['order_type'] ?? '', ['dine_in', 'takeaway', 'delivery'], true) ? $in['order_type'] : ($t ? 'dine_in' : 'delivery');
+$address = mb_substr(trim($in['address'] ?? ''), 0, 400);
+
+if ($order_type === 'dine_in' && !$t) {
+    // If dine in selected but no table, allow user to specify table number or default to takeaway/delivery
+    $order_type = 'takeaway';
+}
+
+if ($order_type === 'delivery' && mb_strlen($address) < 5) {
+    json_out(['ok' => false, 'error' => 'Please provide a valid delivery address.'], 422);
+}
+
 $items = $in['items'] ?? [];
 $notes = mb_substr(trim($in['notes'] ?? ''), 0, 250);
 if (!is_array($items) || !$items || count($items) > 50) json_out(['ok' => false, 'error' => 'Your cart is empty.'], 422);
@@ -32,8 +45,9 @@ foreach ($rows as $r) $sub += $r['price'] * min(20, $qtyById[$r['id']]);
 $pdo = db();
 $pdo->beginTransaction();
 try {
-    q('INSERT INTO orders (customer_id, table_id, subtotal, tax, total, notes) VALUES (?,?,?,?,?,?)',
-      [$c['id'], $t['id'], $sub, $tax, $total, $notes]);
+    $table_id = ($order_type === 'dine_in' && $t) ? $t['id'] : null;
+    q('INSERT INTO orders (customer_id, table_id, order_type, subtotal, tax, total, notes, delivery_address) VALUES (?,?,?,?,?,?,?,?)',
+      [$c['id'], $table_id, $order_type, $sub, $tax, $total, $notes, $address]);
     $oid = (int)$pdo->lastInsertId();
     foreach ($rows as $r) {
         q('INSERT INTO order_items (order_id, item_id, name, price, qty) VALUES (?,?,?,?,?)',

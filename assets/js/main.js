@@ -162,11 +162,30 @@
       if (q) { cart.change(q.dataset.id, +q.dataset.d); render(); }
     });
 
+    // order type toggle
+    const typeRadios = $$('input[name="orderType"]');
+    const addrBox = $('#deliveryAddressBox');
+    typeRadios.forEach(r => r.addEventListener('change', () => {
+      if (addrBox) addrBox.style.display = (r.value === 'delivery') ? 'block' : 'none';
+    }));
+
     async function submitOrder() {
       const c = cart.get(), items = Object.values(c).map(i => ({ id: i.id, qty: i.qty }));
       if (!items.length) return toast('Your cart is empty', 'warning');
+
+      const oType = $('input[name="orderType"]:checked')?.value || 'delivery';
+      const addr = $('#orderAddress')?.value?.trim() || '';
+      if (oType === 'delivery' && addr.length < 5) {
+        return toast('Please enter your delivery address', 'warning');
+      }
+
       const btn = $('#placeOrder'); btn.disabled = true;
-      const res = await api('api/place_order.php', { items, notes: $('#orderNotes').value });
+      const res = await api('api/place_order.php', {
+        items,
+        order_type: oType,
+        address: addr,
+        notes: $('#orderNotes').value
+      });
       btn.disabled = false;
       if (res.ok) { cart.clear(); location.href = APP.base + '/my_orders.php'; return; }
       if (res.error === 'identify') return showIdent();
@@ -177,7 +196,6 @@
       new bootstrap.Modal($('#identModal')).show();
     }
     $('#placeOrder').addEventListener('click', () => {
-      if (!APP.table) return toast('Please scan the QR code on your table to order.', 'warning');
       if (!APP.customer) return showIdent();
       submitOrder();
     });
@@ -200,7 +218,7 @@
   /* ---------- My orders: live status + order again ---------- */
   function initOrders() {
     $$('.reorder-btn').forEach(b => b.addEventListener('click', () => {
-      let items = []; try { items = JSON.parse(b.dataset.items); } catch (e) {}
+      let items = []; try { items = JSON.parse(b.dataset.items); } catch (e) { }
       items.forEach(i => { if (i.id) cart.add(i.id, i.name, 0, i.qty); });
       sessionStorage.setItem('openCart', '1');
       location.href = APP.base + '/index.php#menu';

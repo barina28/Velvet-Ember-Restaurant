@@ -2,8 +2,9 @@
 $page = 'orders';
 $page_title = 'My Orders';
 require_once __DIR__ . '/includes/header.php';
+ensure_orders_schema();
 
-$orders = ($__t && $__c) ? visit_orders((int)$__c['id'], (int)$__t['id']) : [];
+$orders = $__c ? visit_orders((int)$__c['id'], $__t ? (int)$__t['id'] : null) : [];
 $items = order_items(array_column($orders, 'id'));
 $labels = ['pending' => 'Received', 'preparing' => 'Being prepared', 'ready' => 'Ready - on its way', 'served' => 'Served', 'cancelled' => 'Cancelled'];
 ?>
@@ -11,10 +12,13 @@ $labels = ['pending' => 'Received', 'preparing' => 'Being prepared', 'ready' => 
   <div class="container" style="max-width:820px">
     <h1 class="brand-font section-title text-center">My Orders</h1>
 
-    <?php if (!$__t): ?>
-      <div class="card-dark p-4 text-center">Please scan the QR code on your table to see your orders.</div>
+    <?php if (!$__c && !$orders): ?>
+      <div class="card-dark p-4 text-center">
+        <p class="text-muted">You haven't placed an order yet in this session.</p>
+        <a href="<?= BASE ?>/index.php#menu" class="btn btn-burg">Browse Menu & Order</a>
+      </div>
     <?php elseif (!$orders): ?>
-      <div class="card-dark p-4 text-center">No orders yet. <a href="<?= BASE ?>/index.php#menu">Browse the menu</a></div>
+      <div class="card-dark p-4 text-center">No orders placed recently. <a href="<?= BASE ?>/index.php#menu">Browse the menu</a></div>
     <?php else: foreach ($orders as $o): $lines = $items[$o['id']] ?? []; ?>
       <div class="card-dark p-3 p-md-4 mb-3 order-card" data-id="<?= (int)$o['id'] ?>">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">

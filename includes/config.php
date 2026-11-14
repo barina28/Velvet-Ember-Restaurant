@@ -99,6 +99,21 @@ function ensure_reservations_table(): void {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }
 
+function ensure_orders_schema(): void {
+    static $done = false;
+    if ($done) return;
+    $done = true;
+    try {
+        q("ALTER TABLE orders MODIFY table_id INT NULL");
+    } catch (Throwable $e) {}
+    try {
+        q("ALTER TABLE orders ADD COLUMN order_type VARCHAR(20) NOT NULL DEFAULT 'delivery' AFTER table_id");
+    } catch (Throwable $e) {}
+    try {
+        q("ALTER TABLE orders ADD COLUMN delivery_address TEXT NULL AFTER notes");
+    } catch (Throwable $e) {}
+}
+
 function money($n): string { return CURRENCY . ' ' . number_format((float)$n, 0); }
 
 function redirect(string $path): never {
@@ -170,9 +185,12 @@ function calc_totals(float $sub): array {
     return [$sub, $tax, $sub + $tax];
 }
 
-// Orders of this customer at this table during the last 12 hours (current visit)
-function visit_orders(int $customerId, int $tableId): array {
-    return q("SELECT * FROM orders WHERE customer_id = ? AND table_id = ? AND created_at > (NOW() - INTERVAL 12 HOUR) ORDER BY id DESC", [$customerId, $tableId])->fetchAll();
+// Orders of this customer during the last 24 hours (current visit or recent orders)
+function visit_orders(int $customerId, ?int $tableId = null): array {
+    if ($tableId) {
+        return q("SELECT * FROM orders WHERE customer_id = ? AND table_id = ? AND created_at > (NOW() - INTERVAL 24 HOUR) ORDER BY id DESC", [$customerId, $tableId])->fetchAll();
+    }
+    return q("SELECT * FROM orders WHERE customer_id = ? AND created_at > (NOW() - INTERVAL 24 HOUR) ORDER BY id DESC", [$customerId])->fetchAll();
 }
 function order_items(array $orderIds): array {
     if (!$orderIds) return [];

@@ -331,7 +331,7 @@ main {
 .dish {
   background: var(--panel);
   border: 1px solid #2a2a2e;
-  border-radius: 18px;
+  border-radius: 14px;
   overflow: hidden;
   height: 100%;
   display: flex;
@@ -342,39 +342,56 @@ main {
 }
 
 .dish:hover {
-  box-shadow: 0 18px 40px #000b, 0 0 0 1px var(--burg-l);
+  box-shadow: 0 12px 30px #000a, 0 0 0 1px var(--burg-l);
   border-color: var(--burg-l);
 }
 
 .dish img {
   width: 100%;
-  aspect-ratio: 3 / 2;
+  height: 135px;
   object-fit: cover;
   display: block;
 }
 
 .dish-body {
-  padding: 14px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
   flex-grow: 1;
 }
 
 .dish-body h3 {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-family: 'Playfair Display', serif;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
+  font-weight: 600;
 }
 
 .dish-body p {
-  font-size: .8rem;
+  font-size: 0.75rem;
   color: var(--muted);
-  margin-bottom: 12px;
+  margin-bottom: 8px;
+  line-height: 1.35;
+}
+
+.serving-badge {
+  font-size: 0.7rem;
+  color: #e5b967;
+  background: rgba(212, 175, 106, 0.12);
+  border: 1px solid rgba(212, 175, 106, 0.25);
+  border-radius: 6px;
+  padding: 2px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 8px;
+  width: fit-content;
 }
 
 .price {
   color: var(--gold);
   font-weight: 600;
+  font-size: 0.92rem;
 }
 
 /* Floating buttons */

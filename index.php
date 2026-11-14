@@ -18,17 +18,15 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
         <p class="eyebrow">Welcome to</p>
         <h1 class="brand-font display-3 fw-bold"><?= e(setting('restaurant_name')) ?></h1>
         <p class="lead text-muted mb-4"><?= e(setting('tagline')) ?></p>
-        <?php if ($__t): ?>
-          <p class="mb-4"><span class="badge badge-table fs-6"><i class="bi bi-geo-alt-fill"></i> You are at Table <?= e($__t['table_no']) ?></span></p>
-          <a href="#menu" class="btn btn-burg btn-lg px-4">Order now <i class="bi bi-arrow-down"></i></a>
-        <?php else: ?>
-          <a href="<?= BASE ?>/scan_qr.php" class="scan-note text-decoration-none" style="color:inherit">
-            <i class="bi bi-qr-code-scan fs-3"></i>
-            <div><strong>Scan the QR code on your table</strong><br><span class="small text-muted">Tap here to open the scanner. You can browse the menu now, but ordering needs your table's QR code.</span></div>
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a>
-          <a href="#menu" class="btn btn-burg btn-lg px-4 mt-3">Browse menu</a>
-        <?php endif; ?>
+        <div class="d-flex flex-wrap gap-3 justify-content-center justify-content-lg-start mb-4">
+          <a href="#menu" class="btn btn-burg btn-lg px-4"><i class="bi bi-bag-check me-1"></i> Order Online</a>
+          <a href="<?= BASE ?>/reserve.php" class="btn btn-outline-light btn-lg px-4"><i class="bi bi-calendar2-check me-1"></i> Book Table</a>
+        </div>
+        <div class="d-flex gap-4 justify-content-center justify-content-lg-start small text-muted">
+          <span><i class="bi bi-truck text-gold me-1"></i> Fast Delivery</span>
+          <span><i class="bi bi-box-seam text-gold me-1"></i> Takeaway</span>
+          <span><i class="bi bi-geo-alt text-gold me-1"></i> Dine-in</span>
+        </div>
       </div>
       <div class="col-lg-6">
         <div class="stage" id="stage">
@@ -66,14 +64,42 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
       <?php endforeach; ?>
     </div>
 
-    <div class="row g-4 mt-1" id="menuGrid">
-      <?php foreach ($items as $i): ?>
+    <div class="row g-3 g-md-4 mt-1" id="menuGrid">
+      <?php 
+      // Serving helper map for descriptive details
+      $servings = [
+        'Chicken Wings' => ['serves' => '1 - 2 Persons', 'detail' => '6 pcs crispy wings tossed in smoky glaze'],
+        'Spring Rolls' => ['serves' => '1 - 2 Persons', 'detail' => '4 pcs golden vegetable rolls with dip'],
+        'Chaat Platter' => ['serves' => '2 Persons', 'detail' => 'Tangy street-style mixed chaat platter'],
+        'Chicken Tikka' => ['serves' => '1 Person', 'detail' => 'Quarter chicken marinated & charcoal grilled'],
+        'Seekh Kabab' => ['serves' => '2 Persons', 'detail' => '4 juicy minced beef skewers with mint raita'],
+        'Malai Boti' => ['serves' => '1 - 2 Persons', 'detail' => '8 tender boneless melt-in-mouth chicken cubes'],
+        'Chicken Karahi' => ['serves' => '3 - 4 Persons', 'detail' => 'Full handi wok-cooked with ginger & green chilli'],
+        'Beef Nihari' => ['serves' => '2 - 3 Persons', 'detail' => 'Rich slow-cooked beef shank with special gravy'],
+        'Daal Makhni' => ['serves' => '2 Persons', 'detail' => 'Black lentils simmered in fresh butter & cream'],
+        'Chicken Biryani' => ['serves' => '1 - 2 Persons', 'detail' => 'Generous portion basmati rice with spiced chicken'],
+        'Kabuli Pulao' => ['serves' => '1 - 2 Persons', 'detail' => 'Fragrant spiced rice with meat, carrots & raisins'],
+        'Garlic Naan' => ['serves' => '1 Person', 'detail' => 'Clay-oven baked flatbread with garlic butter'],
+        'Tandoori Roti' => ['serves' => '1 Person', 'detail' => 'Fresh whole-wheat clay oven baked roti'],
+        'Gulab Jamun' => ['serves' => '1 - 2 Persons', 'detail' => '2 warm milk dumplings in cardamom rose syrup'],
+        'Kheer' => ['serves' => '1 Person', 'detail' => 'Slow-cooked traditional rice pudding with pistachio'],
+        'Mint Margarita' => ['serves' => '1 Glass', 'detail' => 'Chilled fresh mint, crushed ice, lemon & soda'],
+        'Sweet Lassi' => ['serves' => '1 Glass', 'detail' => 'Creamy chilled yoghurt sweet drink'],
+        'Soft Drink' => ['serves' => '1 Can', 'detail' => '250ml chilled carbonated beverage']
+      ];
+      ?>
+      <?php foreach ($items as $i): 
+        $sInfo = $servings[$i['name']] ?? ['serves' => '1 - 2 Persons', 'detail' => $i['description']];
+      ?>
         <div class="col-6 col-md-4 col-lg-3 menu-col" data-cat="<?= (int)$i['category_id'] ?>">
           <div class="dish tilt">
             <img src="<?= $img($i['image']) ?>" alt="<?= e($i['name']) ?>" loading="lazy">
             <div class="dish-body">
               <h3><?= e($i['name']) ?></h3>
-              <p><?= e($i['description']) ?></p>
+              <div class="serving-badge">
+                <i class="bi bi-people-fill"></i> <?= e($sInfo['serves']) ?>
+              </div>
+              <p><?= e($sInfo['detail']) ?></p>
               <div class="d-flex justify-content-between align-items-center mt-auto">
                 <span class="price"><?= money($i['price']) ?></span>
                 <button class="btn btn-sm btn-burg add-btn" data-id="<?= (int)$i['id'] ?>" data-name="<?= e($i['name']) ?>" data-price="<?= (float)$i['price'] ?>"><i class="bi bi-plus-lg"></i> Add</button>
@@ -148,7 +174,23 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
   </div>
   <div class="offcanvas-body d-flex flex-column">
     <div id="cartLines" class="flex-grow-1"></div>
-    <textarea id="orderNotes" class="form-control my-3" rows="2" maxlength="250" placeholder="Notes for the kitchen (optional) - e.g. less spicy"></textarea>
+    <div class="mb-3">
+      <label class="form-label small text-muted">Order Option</label>
+      <div class="btn-group w-100" role="group" id="orderTypeGroup">
+        <input type="radio" class="btn-check" name="orderType" id="typeDelivery" value="delivery" checked>
+        <label class="btn btn-outline-light btn-sm" for="typeDelivery"><i class="bi bi-truck"></i> Delivery</label>
+
+        <input type="radio" class="btn-check" name="orderType" id="typeTakeaway" value="takeaway">
+        <label class="btn btn-outline-light btn-sm" for="typeTakeaway"><i class="bi bi-box-seam"></i> Takeaway</label>
+
+        <input type="radio" class="btn-check" name="orderType" id="typeDineIn" value="dine_in">
+        <label class="btn btn-outline-light btn-sm" for="typeDineIn"><i class="bi bi-geo-alt"></i> Dine-in</label>
+      </div>
+    </div>
+    <div id="deliveryAddressBox" class="mb-2">
+      <input type="text" id="orderAddress" class="form-control" placeholder="Complete Delivery Address (House/Street/Area)">
+    </div>
+    <textarea id="orderNotes" class="form-control mb-3" rows="2" maxlength="250" placeholder="Special instructions (e.g. less spicy, call before delivery)"></textarea>
     <div class="totals">
       <div class="d-flex justify-content-between"><span>Subtotal</span><span id="cSub"></span></div>
       <div class="d-flex justify-content-between"><span>Tax (<?= e(setting('tax_percent')) ?>%)</span><span id="cTax"></span></div>
