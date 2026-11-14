@@ -1,4 +1,4 @@
-# Burgundy Table - Restaurant QR Ordering System
+# Velvet-Ember - Restaurant QR Ordering System
 PHP 8.1+ / MySQL / HTML / CSS / Bootstrap 5 / JavaScript. Burgundy + black theme with 3D effects.
 
 ## Setup (XAMPP / WAMP / any PHP host)
