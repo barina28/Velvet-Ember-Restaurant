@@ -77,11 +77,64 @@
   };
 
   function initMenu() {
+    let currentCat = 'all';
+    let searchQuery = '';
+
+    function filterMenu() {
+      const q = searchQuery.toLowerCase().trim();
+      let visibleCount = 0;
+      $$('.menu-col').forEach(c => {
+        const catMatch = (currentCat === 'all' || c.dataset.cat === currentCat);
+        const name = (c.querySelector('h3')?.textContent || '').toLowerCase();
+        const desc = (c.querySelector('p')?.textContent || '').toLowerCase();
+        const searchMatch = !q || name.includes(q) || desc.includes(q);
+        const show = catMatch && searchMatch;
+        c.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      let noRes = $('#noMenuResults');
+      if (visibleCount === 0) {
+        if (!noRes) {
+          noRes = document.createElement('div');
+          noRes.id = 'noMenuResults';
+          noRes.className = 'col-12 text-center py-5 text-muted';
+          noRes.innerHTML = '<i class="bi bi-search fs-1 d-block mb-2"></i>No dishes found matching your search.';
+          $('#menuGrid').appendChild(noRes);
+        }
+        noRes.style.display = 'block';
+      } else if (noRes) {
+        noRes.style.display = 'none';
+      }
+    }
+
     // category filter
     $$('#catTabs button').forEach(b => b.addEventListener('click', () => {
-      $$('#catTabs button').forEach(x => x.classList.remove('active')); b.classList.add('active');
-      $$('.menu-col').forEach(c => c.style.display = (b.dataset.cat === 'all' || c.dataset.cat === b.dataset.cat) ? '' : 'none');
+      $$('#catTabs button').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      currentCat = b.dataset.cat;
+      filterMenu();
     }));
+
+    // live search
+    const sInput = $('#menuSearch');
+    const sClear = $('#clearSearch');
+    if (sInput) {
+      sInput.addEventListener('input', () => {
+        searchQuery = sInput.value;
+        if (sClear) sClear.style.display = searchQuery ? 'block' : 'none';
+        filterMenu();
+      });
+      if (sClear) {
+        sClear.addEventListener('click', () => {
+          sInput.value = '';
+          searchQuery = '';
+          sClear.style.display = 'none';
+          filterMenu();
+          sInput.focus();
+        });
+      }
+    }
 
     // price lookup so "order again" can show prices
     const prices = {}; $$('.add-btn').forEach(b => prices[b.dataset.id] = { name: b.dataset.name, price: +b.dataset.price });

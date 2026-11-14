@@ -34,11 +34,13 @@ window.APP = <?= json_encode([
     <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="nav">
       <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-        <li class="nav-item"><a class="nav-link" href="<?= BASE ?>/index.php#menu">Menu</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?= BASE ?>/my_orders.php">My Orders</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?= BASE ?>/bill.php">Bill</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?= BASE ?>/feedback.php"><i class="bi bi-chat-heart"></i> Feedback</a></li>
-        <li class="nav-item"><a class="nav-link" href="<?= BASE ?>/wifi.php"><i class="bi bi-wifi"></i> WiFi</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'home' ? 'active' : '' ?>" href="<?= BASE ?>/index.php#menu">Menu</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'reserve' ? 'active' : '' ?>" href="<?= BASE ?>/reserve.php"><i class="bi bi-calendar2-check text-gold"></i> Reserve Table</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'about' || $page === 'contact' ? 'active' : '' ?>" href="<?= BASE ?>/about.php">About & Contact</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'orders' ? 'active' : '' ?>" href="<?= BASE ?>/my_orders.php">My Orders</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'bill' ? 'active' : '' ?>" href="<?= BASE ?>/bill.php">Bill</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'feedback' ? 'active' : '' ?>" href="<?= BASE ?>/feedback.php"><i class="bi bi-chat-heart"></i> Feedback</a></li>
+        <li class="nav-item"><a class="nav-link <?= $page === 'wifi' ? 'active' : '' ?>" href="<?= BASE ?>/wifi.php"><i class="bi bi-wifi"></i> WiFi</a></li>
         <li class="nav-item"><a class="nav-link small text-muted" href="<?= BASE ?>/login.php">Staff</a></li>
       </ul>
     </div>

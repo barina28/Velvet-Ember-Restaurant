@@ -280,6 +280,23 @@ main {
 }
 
 /* Category tabs */
+.search-bar-box .form-control {
+  background: var(--panel);
+  border-color: #34343a;
+  color: var(--text);
+  padding: 10px 14px;
+}
+.search-bar-box .form-control:focus {
+  background: var(--panel);
+  border-color: var(--gold);
+  color: var(--text);
+  box-shadow: none;
+}
+.search-bar-box .input-group-text,
+.search-bar-box .btn {
+  background: var(--panel) !important;
+  border-color: #34343a;
+}
 .cat-tabs {
   display: flex;
   gap: 8px;

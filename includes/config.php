@@ -73,6 +73,28 @@ function ensure_feedback_table(): void {
         name VARCHAR(80) NOT NULL DEFAULT '',
         rating TINYINT NOT NULL,
         comment TEXT NOT NULL,
+        reply TEXT NULL,
+        replied_at DATETIME NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // add reply column if missing
+    try {
+        q("ALTER TABLE feedback ADD COLUMN reply TEXT NULL AFTER comment, ADD COLUMN replied_at DATETIME NULL AFTER reply");
+    } catch (Throwable $e) {}
+}
+
+function ensure_reservations_table(): void {
+    q("CREATE TABLE IF NOT EXISTS reservations (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        name VARCHAR(80) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
+        email VARCHAR(120) NULL,
+        guests INT NOT NULL DEFAULT 2,
+        reservation_date DATE NOT NULL,
+        reservation_time TIME NOT NULL,
+        special_requests TEXT NULL,
+        status ENUM('pending','confirmed','cancelled') NOT NULL DEFAULT 'pending',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
 }

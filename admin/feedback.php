@@ -3,12 +3,20 @@ require_once __DIR__ . '/../includes/config.php';
 require_login(['admin', 'manager']);
 ensure_feedback_table();
 
-// Delete one feedback (POST + CSRF only)
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete'])) {
+// Delete or Reply to feedback
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    q('DELETE FROM feedback WHERE id = ?', [(int)$_POST['delete']]);
-    flash('Feedback deleted.');
-    redirect('admin/feedback.php');
+    if (isset($_POST['delete'])) {
+        q('DELETE FROM feedback WHERE id = ?', [(int)$_POST['delete']]);
+        flash('Feedback deleted.');
+        redirect('admin/feedback.php');
+    }
+    if (isset($_POST['reply_id'], $_POST['reply_text'])) {
+        $rText = trim($_POST['reply_text']);
+        q('UPDATE feedback SET reply = ?, replied_at = NOW() WHERE id = ?', [$rText, (int)$_POST['reply_id']]);
+        flash('Reply saved successfully.');
+        redirect('admin/feedback.php');
+    }
 }
 
 $title = 'Feedback'; $active = 'feedback';
@@ -49,11 +57,45 @@ $stars = fn($n) => str_repeat('★', $n) . str_repeat('☆', 5 - $n);
       <td><?= $f['name'] !== '' ? e($f['name']) : '<span class="text-muted">Anonymous</span>' ?></td>
       <td><?= $f['table_no'] !== null ? e($f['table_no']) : '-' ?></td>
       <td class="text-gold text-nowrap"><?= $stars((int)$f['rating']) ?></td>
-      <td style="min-width:220px"><?= $f['comment'] !== '' ? nl2br(e($f['comment'])) : '<span class="text-muted">-</span>' ?></td>
-      <td>
-        <form method="post" onsubmit="return confirm('Delete this feedback?')"><?= csrf_field() ?>
+      <td style="min-width:260px">
+        <div><?= $f['comment'] !== '' ? nl2br(e($f['comment'])) : '<span class="text-muted">-</span>' ?></div>
+        <?php if (!empty($f['reply'])): ?>
+          <div class="mt-2 p-2 rounded bg-dark border border-secondary-subtle small">
+            <strong class="text-gold"><i class="bi bi-reply-fill"></i> Manager's Reply:</strong>
+            <p class="mb-0 text-light"><?= nl2br(e($f['reply'])) ?></p>
+            <div class="text-muted" style="font-size:0.75rem"><?= e(date('d M Y h:i A', strtotime($f['replied_at']))) ?></div>
+          </div>
+        <?php endif; ?>
+      </td>
+      <td class="text-nowrap text-end">
+        <button type="button" class="btn btn-sm btn-outline-light me-1" data-bs-toggle="modal" data-bs-target="#replyModal<?= (int)$f['id'] ?>" title="Reply"><i class="bi bi-reply"></i> Reply</button>
+        <form method="post" class="d-inline" onsubmit="return confirm('Delete this feedback?')"><?= csrf_field() ?>
           <button class="btn btn-sm btn-outline-danger" name="delete" value="<?= (int)$f['id'] ?>"><i class="bi bi-trash"></i></button>
         </form>
+
+        <!-- Reply Modal -->
+        <div class="modal fade text-start" id="replyModal<?= (int)$f['id'] ?>" tabindex="-1">
+          <div class="modal-dialog modal-dialog-centered">
+            <form method="post" action="" class="modal-content card-dark">
+              <?= csrf_field() ?>
+              <input type="hidden" name="reply_id" value="<?= (int)$f['id'] ?>">
+              <div class="modal-header border-0">
+                <h5 class="modal-title brand-font">Reply to <?= e($f['name'] ?: 'Customer') ?></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                <p class="text-muted small mb-2"><strong>Comment:</strong> "<?= e($f['comment']) ?>"</p>
+                <div class="mb-3">
+                  <label class="form-label small">Official Response / Internal Note:</label>
+                  <textarea name="reply_text" class="form-control" rows="3" required placeholder="Type your response here..."><?= e($f['reply'] ?? '') ?></textarea>
+                </div>
+              </div>
+              <div class="modal-footer border-0">
+                <button type="submit" class="btn btn-burg">Save Reply</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </td>
     </tr>
   <?php endforeach; if (!$rows) echo '<tr><td colspan="6" class="text-muted">No feedback yet.</td></tr>'; ?>

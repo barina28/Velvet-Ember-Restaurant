@@ -47,6 +47,18 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
 <section id="menu" class="py-5">
   <div class="container">
     <h2 class="brand-font text-center section-title">Our Menu</h2>
+
+    <!-- Menu Live Search -->
+    <div class="row justify-content-center mb-4">
+      <div class="col-md-6 col-lg-5">
+        <div class="input-group search-bar-box">
+          <span class="input-group-text bg-transparent border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" id="menuSearch" class="form-control border-start-0 ps-0" placeholder="Search delicious dishes..." autocomplete="off">
+          <button class="btn btn-outline-secondary border-start-0 text-muted" type="button" id="clearSearch" style="display:none"><i class="bi bi-x-lg"></i></button>
+        </div>
+      </div>
+    </div>
+
     <div class="cat-tabs" id="catTabs">
       <button class="active" data-cat="all">All</button>
       <?php foreach ($cats as $c): if (empty($byCat[$c['id']])) continue; ?>
@@ -70,6 +82,55 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
           </div>
         </div>
       <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPECIAL OFFERS & DEALS ============ -->
+<section id="deals" class="py-5" style="background: linear-gradient(180deg, rgba(20,20,22,0.85) 0%, rgba(10,10,11,1) 100%);">
+  <div class="container">
+    <div class="text-center mb-4">
+      <p class="eyebrow mb-1">Chef's Specials & Discounts</p>
+      <h2 class="brand-font section-title">Exclusive Deals & Offers</h2>
+      <p class="text-muted">Handpicked combos and limited-time savings crafted for food lovers.</p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <div class="card-dark p-4 h-100 border border-gold-subtle position-relative overflow-hidden">
+          <span class="badge bg-danger position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill">Save 25%</span>
+          <h3 class="brand-font h4 mb-2 text-gold">Royal Feast Combo</h3>
+          <p class="text-muted small mb-3">1 Chicken Biryani + 1 Chicken Karahi + 2 Garlic Naan + 2 Soft Drinks.</p>
+          <div class="d-flex align-items-baseline gap-2 mb-3">
+            <span class="fs-4 fw-bold text-light"><?= money(2450) ?></span>
+            <span class="text-muted text-decoration-line-through small"><?= money(3200) ?></span>
+          </div>
+          <a href="#menu" class="btn btn-burg w-100"><i class="bi bi-cart-plus me-1"></i> View In Menu</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-dark p-4 h-100 border border-gold-subtle position-relative overflow-hidden">
+          <span class="badge bg-warning text-dark position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill fw-bold">Popular</span>
+          <h3 class="brand-font h4 mb-2 text-gold">BBQ Platter Delight</h3>
+          <p class="text-muted small mb-3">Seekh Kabab (4 pcs) + Malai Boti + Chicken Tikka + Raita & 3 Tandoori Rotis.</p>
+          <div class="d-flex align-items-baseline gap-2 mb-3">
+            <span class="fs-4 fw-bold text-light"><?= money(2199) ?></span>
+            <span class="text-muted text-decoration-line-through small"><?= money(2750) ?></span>
+          </div>
+          <a href="#menu" class="btn btn-burg w-100"><i class="bi bi-cart-plus me-1"></i> View In Menu</a>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="card-dark p-4 h-100 border border-gold-subtle position-relative overflow-hidden">
+          <span class="badge bg-success position-absolute top-0 end-0 m-3 px-3 py-2 rounded-pill">Sweet Deal</span>
+          <h3 class="brand-font h4 mb-2 text-gold">Dessert & Drink Pair</h3>
+          <p class="text-muted small mb-3">Gulab Jamun (warm) or Shahi Kheer + 2 Mint Margaritas at special price.</p>
+          <div class="d-flex align-items-baseline gap-2 mb-3">
+            <span class="fs-4 fw-bold text-light"><?= money(850) ?></span>
+            <span class="text-muted text-decoration-line-through small"><?= money(1100) ?></span>
+          </div>
+          <a href="#menu" class="btn btn-burg w-100"><i class="bi bi-cart-plus me-1"></i> View In Menu</a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
