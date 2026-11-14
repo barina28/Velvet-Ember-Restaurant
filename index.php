@@ -196,23 +196,122 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
       <div class="d-flex justify-content-between"><span>Tax (<?= e(setting('tax_percent')) ?>%)</span><span id="cTax"></span></div>
       <div class="d-flex justify-content-between fw-bold fs-5 mt-1"><span>Total</span><span id="cTotal"></span></div>
     </div>
-    <button class="btn btn-burg btn-lg w-100 mt-3" id="placeOrder">Place order</button>
+    <button class="btn btn-burg btn-lg w-100 mt-3" id="placeOrder"><i class="bi bi-arrow-right-circle me-1"></i> Proceed to Checkout</button>
     <a href="<?= BASE ?>/my_orders.php" class="btn btn-link text-muted w-100 mt-1">View my orders</a>
   </div>
 </div>
 
-<!-- Identify modal -->
-<div class="modal fade" id="identModal" tabindex="-1" data-bs-backdrop="static">
-  <div class="modal-dialog modal-dialog-centered">
-    <form class="modal-content card-dark" id="identForm">
-      <div class="modal-header border-0"><h5 class="modal-title brand-font">Before we start</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
-      <div class="modal-body">
-        <p class="text-muted small">We save your details so we can serve you better and so you can order again easily.</p>
-        <div class="mb-3"><label class="form-label">Your name</label><input class="form-control" name="name" required maxlength="80"></div>
-        <div class="mb-2"><label class="form-label">Mobile number</label><input class="form-control" name="phone" inputmode="tel" placeholder="03001234567" required></div>
-        <div class="text-danger small" id="identErr"></div>
+<!-- Complete Checkout / Order Confirmation Modal -->
+<div class="modal fade" id="checkoutModal" tabindex="-1" data-bs-backdrop="static">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <form class="modal-content card-dark border border-gold-subtle" id="checkoutForm">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h4 class="modal-title brand-font text-gold"><i class="bi bi-shield-check me-2"></i> Order Confirmation & Checkout</h4>
+          <p class="text-muted small mb-0">Please verify your details and select your preferred payment method.</p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-footer border-0"><button class="btn btn-burg w-100">Continue</button></div>
+
+      <div class="modal-body py-4">
+        <div class="row g-4">
+          <!-- Left Column: Customer & Order Details -->
+          <div class="col-md-6 border-end-md border-dark-subtle">
+            <h5 class="h6 text-uppercase text-gold mb-3" style="letter-spacing:1px"><i class="bi bi-person-lines-fill me-1"></i> Customer Information</h5>
+            <div class="mb-3">
+              <label class="form-label small">Full Name <span class="text-danger">*</span></label>
+              <input type="text" id="chkName" class="form-control" placeholder="e.g. Ali Khan" required value="<?= e($__c['name'] ?? '') ?>">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Mobile Phone (for delivery/order updates) <span class="text-danger">*</span></label>
+              <input type="tel" id="chkPhone" class="form-control" placeholder="03001234567" required value="<?= e($__c['phone'] ?? '') ?>">
+            </div>
+            <div class="mb-3">
+              <label class="form-label small">Email (Optional)</label>
+              <input type="email" id="chkEmail" class="form-control" placeholder="name@example.com" value="<?= e($__c['email'] ?? '') ?>">
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small">Delivery / Service Type</label>
+              <div class="d-flex gap-2">
+                <span class="badge bg-secondary fs-6 py-2 px-3 text-uppercase" id="chkOrderTypeBadge">Delivery</span>
+              </div>
+            </div>
+
+            <div id="chkAddressField" class="mb-3">
+              <label class="form-label small">Full Delivery Address <span class="text-danger">*</span></label>
+              <textarea id="chkAddress" class="form-control" rows="2" placeholder="House/Flat number, Street, Landmark, Area..."></textarea>
+            </div>
+          </div>
+
+          <!-- Right Column: Payment & Order Summary -->
+          <div class="col-md-6">
+            <h5 class="h6 text-uppercase text-gold mb-3" style="letter-spacing:1px"><i class="bi bi-credit-card-2-front me-1"></i> Payment Method</h5>
+
+            <!-- Payment selection options -->
+            <div class="mb-3">
+              <div class="form-check card-dark p-3 mb-2 border border-secondary rounded">
+                <input class="form-check-input" type="radio" name="chkPaymentMethod" id="payCOD" value="cod" checked>
+                <label class="form-check-label w-100 cursor-pointer" for="payCOD">
+                  <strong class="d-block text-light"><i class="bi bi-cash-stack text-success me-1"></i> Cash On Delivery / Cash</strong>
+                  <span class="text-muted small">Pay with cash when your food is delivered or served.</span>
+                </label>
+              </div>
+
+              <div class="form-check card-dark p-3 border border-secondary rounded">
+                <input class="form-check-input" type="radio" name="chkPaymentMethod" id="payBank" value="bank">
+                <label class="form-check-label w-100 cursor-pointer" for="payBank">
+                  <strong class="d-block text-gold"><i class="bi bi-bank2 text-gold me-1"></i> Online Bank Transfer / Wallet</strong>
+                  <span class="text-muted small">Direct bank transfer via EasyPaisa, JazzCash, or Pakistani Banks.</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Bank Selection Dropdown (Only visible when Bank selected) -->
+            <div id="bankSelectionBox" class="mb-3 p-3 rounded bg-dark border border-gold-subtle" style="display:none">
+              <label class="form-label small text-gold fw-bold">Select Your Bank / Wallet:</label>
+              <select id="chkBankSelect" class="form-select mb-2">
+                <option value="JazzCash">JazzCash</option>
+                <option value="Easypaisa">Easypaisa</option>
+                <option value="Nayapay">Nayapay / Sadapay</option>
+                <option value="Meezan Bank">Meezan Bank</option>
+                <option value="HBL (Habib Bank)">HBL (Habib Bank)</option>
+                <option value="UBL (United Bank)">UBL (United Bank)</option>
+                <option value="Bank Alfalah">Bank Alfalah</option>
+                <option value="MCB Bank">MCB Bank</option>
+                <option value="Faysal Bank">Faysal Bank</option>
+                <option value="Other Bank">Other Bank / Transfer</option>
+              </select>
+              <div class="small text-muted">
+                <i class="bi bi-info-circle text-gold me-1"></i> Our restaurant account details will be shared on confirmation.
+              </div>
+            </div>
+
+            <!-- Order Summary Box -->
+            <div class="card-dark p-3 rounded border border-dark-subtle mt-3">
+              <h6 class="small text-muted text-uppercase mb-2">Bill Summary</h6>
+              <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>Subtotal</span><span id="chkSubtotal">-</span>
+              </div>
+              <div class="d-flex justify-content-between small text-muted mb-1">
+                <span>Tax (<?= e(setting('tax_percent')) ?>%)</span><span id="chkTax">-</span>
+              </div>
+              <div class="d-flex justify-content-between fw-bold fs-5 text-light border-top border-dark-subtle pt-2 mt-2">
+                <span>Total Payable:</span><span class="text-gold" id="chkTotalPayable">-</span>
+              </div>
+            </div>
+            
+            <div id="chkError" class="text-danger small mt-2"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Back to Cart</button>
+        <button type="submit" class="btn btn-burg px-4 py-2 fs-5" id="btnConfirmFinalOrder">
+          <i class="bi bi-check2-circle me-1"></i> Confirm & Place Order
+        </button>
+      </div>
     </form>
   </div>
 </div>

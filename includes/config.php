@@ -112,6 +112,12 @@ function ensure_orders_schema(): void {
     try {
         q("ALTER TABLE orders ADD COLUMN delivery_address TEXT NULL AFTER notes");
     } catch (Throwable $e) {}
+    try {
+        q("ALTER TABLE orders ADD COLUMN payment_method VARCHAR(40) NOT NULL DEFAULT 'cod' AFTER payment_status");
+    } catch (Throwable $e) {}
+    try {
+        q("ALTER TABLE orders ADD COLUMN bank_name VARCHAR(60) NULL AFTER payment_method");
+    } catch (Throwable $e) {}
 }
 
 function money($n): string { return CURRENCY . ' ' . number_format((float)$n, 0); }

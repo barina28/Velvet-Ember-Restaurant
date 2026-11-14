@@ -12,6 +12,16 @@ $labels = ['pending' => 'Received', 'preparing' => 'Being prepared', 'ready' => 
   <div class="container" style="max-width:820px">
     <h1 class="brand-font section-title text-center">My Orders</h1>
 
+    <?php if (!empty($_GET['placed'])): ?>
+      <div class="alert alert-success d-flex align-items-center gap-2 mb-4">
+        <i class="bi bi-check-circle-fill fs-3"></i>
+        <div>
+          <h5 class="alert-heading mb-1">Your order has been placed successfully!</h5>
+          <p class="mb-0 small">Our kitchen is preparing your delicious meal. We will keep you updated.</p>
+        </div>
+      </div>
+    <?php endif; ?>
+
     <?php if (!$__c && !$orders): ?>
       <div class="card-dark p-4 text-center">
         <p class="text-muted">You haven't placed an order yet in this session.</p>
@@ -36,7 +46,15 @@ $labels = ['pending' => 'Received', 'preparing' => 'Being prepared', 'ready' => 
             <li class="d-flex justify-content-between"><span><?= (int)$l['qty'] ?> &times; <?= e($l['name']) ?></span><span><?= money($l['price'] * $l['qty']) ?></span></li>
           <?php endforeach; ?>
         </ul>
-        <?php if ($o['notes']): ?><p class="small text-muted">Note: <?= e($o['notes']) ?></p><?php endif; ?>
+        <?php if ($o['notes']): ?><p class="small text-muted mb-1">Note: <?= e($o['notes']) ?></p><?php endif; ?>
+        <?php if (!empty($o['delivery_address'])): ?>
+          <p class="small text-muted mb-1"><i class="bi bi-geo-alt text-gold"></i> Delivery: <?= e($o['delivery_address']) ?></p>
+        <?php endif; ?>
+        <?php if (!empty($o['payment_method'])): ?>
+          <p class="small text-muted mb-2">
+            <i class="bi bi-wallet2 text-gold"></i> Method: <strong><?= $o['payment_method'] === 'bank' ? 'Bank Transfer (' . e($o['bank_name'] ?? 'Bank') . ')' : 'Cash on Delivery (COD)' ?></strong>
+          </p>
+        <?php endif; ?>
         <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
           <strong>Total <?= money($o['total']) ?></strong>
           <button class="btn btn-sm btn-outline-light reorder-btn" data-items='<?= e(json_encode(array_map(fn($l) => ['id' => (int)$l['item_id'], 'name' => $l['name'], 'qty' => (int)$l['qty']], $lines))) ?>'><i class="bi bi-arrow-repeat"></i> Order again</button>

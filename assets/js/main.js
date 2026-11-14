@@ -169,43 +169,107 @@
       if (addrBox) addrBox.style.display = (r.value === 'delivery') ? 'block' : 'none';
     }));
 
-    async function submitOrder() {
-      const c = cart.get(), items = Object.values(c).map(i => ({ id: i.id, qty: i.qty }));
+    // Payment method toggle in checkout modal
+    const payRadios = $$('input[name="chkPaymentMethod"]');
+    const bankBox = $('#bankSelectionBox');
+    payRadios.forEach(r => r.addEventListener('change', () => {
+      if (bankBox) bankBox.style.display = (r.value === 'bank') ? 'block' : 'none';
+    }));
+
+    // Open Checkout Confirmation Chart / Modal
+    function openCheckoutModal() {
+      const c = cart.get(), items = Object.values(c);
       if (!items.length) return toast('Your cart is empty', 'warning');
 
+      // Populate summary totals
+      let sub = 0;
+      items.forEach(it => sub += (it.price * it.qty));
+      const tax = Math.round(sub * (APP.tax || 0) / 100);
+      const total = sub + tax;
+
+      $('#chkSubtotal').textContent = money(sub);
+      $('#chkTax').textContent = money(tax);
+      $('#chkTotalPayable').textContent = money(total);
+
       const oType = $('input[name="orderType"]:checked')?.value || 'delivery';
-      const addr = $('#orderAddress')?.value?.trim() || '';
-      if (oType === 'delivery' && addr.length < 5) {
-        return toast('Please enter your delivery address', 'warning');
+      const typeLabel = oType === 'dine_in' ? 'Dine-In' : (oType === 'takeaway' ? 'Takeaway (Self Pick)' : 'Home Delivery');
+      $('#chkOrderTypeBadge').textContent = typeLabel;
+
+      const chkAddrField = $('#chkAddressField');
+      if (chkAddrField) {
+        chkAddrField.style.display = (oType === 'delivery') ? 'block' : 'none';
+        if (oType === 'delivery') {
+          $('#chkAddress').value = $('#orderAddress')?.value?.trim() || $('#chkAddress').value || '';
+        }
       }
 
-      const btn = $('#placeOrder'); btn.disabled = true;
+      // Hide cart drawer and show checkout modal
+      const off = bootstrap.Offcanvas.getInstance($('#cartDrawer'));
+      if (off) off.hide();
+
+      new bootstrap.Modal($('#checkoutModal')).show();
+    }
+
+    $('#placeOrder').addEventListener('click', () => {
+      openCheckoutModal();
+    });
+
+    // Handle final order submission with Bank / COD confirmation
+    $('#checkoutForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const errBox = $('#chkError');
+      errBox.textContent = '';
+
+      const name = $('#chkName').value.trim();
+      const phone = $('#chkPhone').value.trim();
+      const email = $('#chkEmail')?.value?.trim() || '';
+      const oType = $('input[name="orderType"]:checked')?.value || 'delivery';
+      const address = $('#chkAddress')?.value?.trim() || '';
+      const payMethod = $('input[name="chkPaymentMethod"]:checked')?.value || 'cod';
+      const bankName = (payMethod === 'bank') ? $('#chkBankSelect')?.value : '';
+
+      if (name.length < 2) { errBox.textContent = 'Please enter your full name.'; return; }
+      if (phone.length < 7) { errBox.textContent = 'Please enter a valid phone number.'; return; }
+      if (oType === 'delivery' && address.length < 5) {
+        errBox.textContent = 'Please provide complete delivery address.';
+        return;
+      }
+
+      const btn = $('#btnConfirmFinalOrder');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing Order...';
+
+      // 1. Identify customer
+      const idRes = await api('api/identify.php', { name, phone });
+      if (!idRes.ok) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Confirm & Place Order';
+        errBox.textContent = idRes.error || 'Failed to verify customer details.';
+        return;
+      }
+      APP.customer = idRes.name;
+
+      // 2. Place order with bank/cod
+      const c = cart.get(), items = Object.values(c).map(i => ({ id: i.id, qty: i.qty }));
       const res = await api('api/place_order.php', {
         items,
         order_type: oType,
-        address: addr,
-        notes: $('#orderNotes').value
+        address,
+        pay_method: payMethod,
+        bank_name: bankName,
+        notes: $('#orderNotes')?.value || ''
       });
+
       btn.disabled = false;
-      if (res.ok) { cart.clear(); location.href = APP.base + '/my_orders.php'; return; }
-      if (res.error === 'identify') return showIdent();
-      toast(res.error || 'Could not place the order', 'danger');
-    }
-    function showIdent() {
-      const off = bootstrap.Offcanvas.getInstance($('#cartDrawer')); if (off) off.hide();
-      new bootstrap.Modal($('#identModal')).show();
-    }
-    $('#placeOrder').addEventListener('click', () => {
-      if (!APP.customer) return showIdent();
-      submitOrder();
-    });
-    $('#identForm').addEventListener('submit', async e => {
-      e.preventDefault();
-      const f = e.target, res = await api('api/identify.php', { name: f.name.value, phone: f.phone.value });
-      if (!res.ok) { $('#identErr').textContent = res.error || 'Please check your details'; return; }
-      APP.customer = res.name;
-      bootstrap.Modal.getInstance($('#identModal')).hide();
-      submitOrder();
+      btn.innerHTML = '<i class="bi bi-check2-circle me-1"></i> Confirm & Place Order';
+
+      if (res.ok) {
+        cart.clear();
+        bootstrap.Modal.getInstance($('#checkoutModal')).hide();
+        location.href = APP.base + '/my_orders.php?placed=1';
+      } else {
+        errBox.textContent = res.error || 'Could not place order, please try again.';
+      }
     });
 
     render();

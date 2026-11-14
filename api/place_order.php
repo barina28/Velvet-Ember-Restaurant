@@ -11,14 +11,19 @@ if (!$c) json_out(['ok' => false, 'error' => 'identify'], 401);
 $in    = json_in();
 $order_type = in_array($in['order_type'] ?? '', ['dine_in', 'takeaway', 'delivery'], true) ? $in['order_type'] : ($t ? 'dine_in' : 'delivery');
 $address = mb_substr(trim($in['address'] ?? ''), 0, 400);
+$pay_method = in_array($in['pay_method'] ?? '', ['cod', 'bank'], true) ? $in['pay_method'] : 'cod';
+$bank_name = mb_substr(trim($in['bank_name'] ?? ''), 0, 60);
 
 if ($order_type === 'dine_in' && !$t) {
-    // If dine in selected but no table, allow user to specify table number or default to takeaway/delivery
     $order_type = 'takeaway';
 }
 
 if ($order_type === 'delivery' && mb_strlen($address) < 5) {
     json_out(['ok' => false, 'error' => 'Please provide a valid delivery address.'], 422);
+}
+
+if ($pay_method === 'bank' && empty($bank_name)) {
+    json_out(['ok' => false, 'error' => 'Please select or specify your bank name.'], 422);
 }
 
 $items = $in['items'] ?? [];
@@ -46,8 +51,9 @@ $pdo = db();
 $pdo->beginTransaction();
 try {
     $table_id = ($order_type === 'dine_in' && $t) ? $t['id'] : null;
-    q('INSERT INTO orders (customer_id, table_id, order_type, subtotal, tax, total, notes, delivery_address) VALUES (?,?,?,?,?,?,?,?)',
-      [$c['id'], $table_id, $order_type, $sub, $tax, $total, $notes, $address]);
+    $p_status = 'unpaid';
+    q('INSERT INTO orders (customer_id, table_id, order_type, subtotal, tax, total, notes, delivery_address, payment_status, payment_method, bank_name) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      [$c['id'], $table_id, $order_type, $sub, $tax, $total, $notes, $address, $p_status, $pay_method, $bank_name]);
     $oid = (int)$pdo->lastInsertId();
     foreach ($rows as $r) {
         q('INSERT INTO order_items (order_id, item_id, name, price, qty) VALUES (?,?,?,?,?)',
