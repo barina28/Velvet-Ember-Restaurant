@@ -60,6 +60,10 @@ try {
           [$oid, $r['id'], $r['name'], $r['price'], $qtyById[$r['id']]]);
     }
     $pdo->commit();
+
+    // Trigger confirmation SMS / Notification to customer's mobile
+    $smsText = "Velvet Ember: Thank you " . $c['name'] . "! Order #" . $oid . " confirmed (Total: Rs. " . number_format($total) . "). Estimated delivery time: 35-45 mins.";
+    send_order_sms($c['phone'], $smsText);
 } catch (Throwable $ex) {
     $pdo->rollBack();
     json_out(['ok' => false, 'error' => 'Could not place the order, please try again.'], 500);

@@ -122,6 +122,22 @@ function ensure_orders_schema(): void {
 
 function money($n): string { return CURRENCY . ' ' . number_format((float)$n, 0); }
 
+// SMS & WhatsApp Notification Dispatcher
+function send_order_sms(string $phone, string $msg): void {
+    // 1. Log notification to local log file for monitoring
+    $logFile = dirname(__DIR__) . '/sms_notifications.log';
+    $logEntry = '[' . date('Y-m-d H:i:s') . '] TO: ' . $phone . ' | ' . $msg . PHP_EOL;
+    @file_put_contents($logFile, $logEntry, FILE_APPEND);
+
+    // 2. Integration point: SMS Gateway API (e.g. Twilio, Zong/Jazz Business SMS, or SMSPK)
+    // To connect a live API, plug API key & cURL call here:
+    /*
+    $api_url = "https://your-sms-provider.com/api/send";
+    $payload = ['to' => $phone, 'message' => $msg, 'sender' => 'VELVET'];
+    // curl_post($api_url, $payload);
+    */
+}
+
 function redirect(string $path): never {
     header('Location: ' . BASE . '/' . ltrim($path, '/'));
     exit;

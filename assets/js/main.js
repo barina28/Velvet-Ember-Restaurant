@@ -287,6 +287,19 @@
       sessionStorage.setItem('openCart', '1');
       location.href = APP.base + '/index.php#menu';
     }));
+    $$('.cancel-order-btn').forEach(b => b.addEventListener('click', async () => {
+      if (!confirm('Are you sure you want to cancel this order?')) return;
+      b.disabled = true;
+      const res = await api('api/cancel_order.php', { order_id: +b.dataset.id });
+      b.disabled = false;
+      if (res.ok) {
+        toast(res.message, 'success');
+        setTimeout(() => location.reload(), 800);
+      } else {
+        toast(res.error || 'Could not cancel order', 'danger');
+      }
+    }));
+
     const labels = { pending: 'Received', preparing: 'Being prepared', ready: 'Ready - on its way', served: 'Served', cancelled: 'Cancelled' };
     const payLabels = { paid: 'Paid', cash_pending: 'Cash - waiter coming', unpaid: 'Unpaid' };
     async function poll() {
