@@ -190,7 +190,10 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
     <div id="deliveryAddressBox" class="mb-2">
       <input type="text" id="orderAddress" class="form-control" placeholder="Complete Delivery Address (House/Street/Area)">
     </div>
-    <textarea id="orderNotes" class="form-control mb-3" rows="2" maxlength="250" placeholder="Special instructions (e.g. less spicy, call before delivery)"></textarea>
+    <div class="mb-3">
+      <label class="form-label small text-muted mb-1"><i class="bi bi-pencil-square text-gold me-1"></i> Special Instructions (Optional)</label>
+      <textarea id="orderNotes" class="form-control" rows="3" maxlength="250" placeholder="e.g. Less spicy, extra sauce, call on arrival"></textarea>
+    </div>
     <div class="totals">
       <div class="d-flex justify-content-between"><span>Subtotal</span><span id="cSub"></span></div>
       <div class="d-flex justify-content-between"><span>Tax (<?= e(setting('tax_percent')) ?>%)</span><span id="cTax"></span></div>
