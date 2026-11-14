@@ -3,8 +3,8 @@ require_once __DIR__ . '/../includes/config.php';
 $u = user();
 if (!$u) json_out(['ok' => false, 'error' => 'Not logged in'], 401);
 
-$orders = q("SELECT o.id, o.status, o.notes, o.created_at, t.table_no, c.name AS customer
-             FROM orders o JOIN dining_tables t ON t.id = o.table_id JOIN customers c ON c.id = o.customer_id
+$orders = q("SELECT o.id, o.status, o.notes, o.created_at, o.order_type, t.table_no, c.name AS customer
+             FROM orders o LEFT JOIN dining_tables t ON t.id = o.table_id JOIN customers c ON c.id = o.customer_id
              WHERE o.status IN ('pending','preparing','ready') ORDER BY o.id")->fetchAll();
 $items = order_items(array_column($orders, 'id'));
 foreach ($orders as &$o) { $o['id'] = (int)$o['id']; $o['items'] = $items[$o['id']] ?? []; }

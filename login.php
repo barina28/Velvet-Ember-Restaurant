@@ -35,11 +35,38 @@ $rname = setting('restaurant_name', 'Restaurant');
   <form method="post" autocomplete="off">
     <?= csrf_field() ?>
     <div class="mb-3 text-start"><label class="form-label">Username</label>
-      <input name="username" class="form-control" required autofocus></div>
+      <input name="username" id="loginUser" class="form-control" required autofocus></div>
     <div class="mb-4 text-start"><label class="form-label">Password</label>
-      <input type="password" name="password" class="form-control" required></div>
+      <input type="password" name="password" id="loginPass" class="form-control" required></div>
     <button class="btn btn-burg w-100 py-2">Sign in</button>
   </form>
+
+  <!-- Demo Accounts Helper Box -->
+  <div class="mt-4 p-3 rounded bg-dark border border-secondary text-start">
+    <div class="d-flex align-items-center justify-content-between mb-2">
+      <strong class="text-gold small"><i class="bi bi-key-fill me-1"></i> Demo Accounts (Click to Fill)</strong>
+      <span class="badge bg-secondary" style="font-size:0.65rem">Auto-Fill</span>
+    </div>
+    <div class="d-flex flex-wrap gap-1 mb-2">
+      <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 demo-btn" data-u="admin" data-p="admin123" title="Full Access">Admin</button>
+      <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 demo-btn" data-u="manager" data-p="manager123" title="Manager Panel">Manager</button>
+      <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 demo-btn" data-u="kitchen" data-p="kitchen123" title="Kitchen Board">Kitchen</button>
+      <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 demo-btn" data-u="cashier" data-p="cashier123" title="Cashier Board">Cashier</button>
+      <button type="button" class="btn btn-sm btn-outline-light py-0 px-2 demo-btn" data-u="waiter" data-p="waiter123" title="Waiter Board">Waiter</button>
+    </div>
+    <div class="small text-muted" style="font-size:0.75rem">
+      Password for all demo accounts: <code class="text-light">&lt;username&gt;123</code> (e.g. <strong>admin / admin123</strong>)
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('.demo-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.getElementById('loginUser').value = btn.dataset.u;
+        document.getElementById('loginPass').value = btn.dataset.p;
+      });
+    });
+  </script>
   <a href="<?= BASE ?>/index.php" class="d-block mt-4 small text-muted">&larr; Back to website</a>
 </div>
 </body>

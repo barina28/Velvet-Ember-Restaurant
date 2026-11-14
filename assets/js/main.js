@@ -357,8 +357,9 @@
       const lines = o.items.map(i => '<li>' + i.qty + ' &times; ' + esc(i.name) + '</li>').join('');
       const mins = Math.max(0, Math.round((Date.now() - new Date(o.created_at.replace(' ', 'T')).getTime()) / 60000));
       const isNew = !known.has('o' + o.id) && !first;
+      const typeBadge = o.table_no ? ('Table ' + esc(o.table_no)) : (esc(o.order_type || 'Delivery').toUpperCase());
       return '<div class="ticket ' + (o.status === 'ready' ? 'ready' : '') + (isNew ? ' new-flash' : '') + '">' +
-        '<div class="d-flex justify-content-between"><span class="tbl">Table ' + esc(o.table_no) + ' &middot; #' + o.id + '</span><small class="text-muted">' + mins + ' min</small></div>' +
+        '<div class="d-flex justify-content-between"><span class="tbl"><span class="badge bg-secondary me-1">' + typeBadge + '</span> #' + o.id + '</span><small class="text-muted">' + mins + ' min</small></div>' +
         '<small class="text-muted">' + esc(o.customer) + '</small><ul>' + lines + '</ul>' +
         (o.notes ? '<div class="small text-warning mb-2">Note: ' + esc(o.notes) + '</div>' : '') +
         '<div class="d-flex gap-2"><button class="btn btn-sm btn-burg flex-grow-1" data-act="status" data-id="' + o.id + '" data-status="' + nextStatus[o.status] + '">' + nextLabel[o.status] + '</button>' +
