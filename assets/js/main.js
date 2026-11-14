@@ -151,8 +151,9 @@
       $('#cartLines').innerHTML = html || '<p class="text-muted text-center mt-4">Your cart is empty.</p>';
       const tax = Math.round(sub * (APP.tax || 0) / 100);
       $('#cSub').textContent = money(sub); $('#cTax').textContent = money(tax); $('#cTotal').textContent = money(sub + tax);
-      $('#cartCount').textContent = count; $('#cartTotalBtn').textContent = money(sub + tax);
-      $('#cartBtn').classList.toggle('show', count > 0);
+      $('#cartCount').textContent = count;
+      if ($('#cartTotalBtn')) $('#cartTotalBtn').textContent = money(sub + tax);
+      $('#cartBtn').style.display = count > 0 ? 'inline-flex' : 'none';
     }
 
     document.addEventListener('click', e => {

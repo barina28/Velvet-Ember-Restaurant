@@ -474,23 +474,54 @@ main {
   border-radius: 10px;
   padding: 8px 12px;
 }
+
+/* Floating Bag Button */
+.cart-fab {
   position: fixed;
-  left: 50%;
-  bottom: 18px;
-  transform: translateX(-50%);
+  right: 22px;
+  bottom: 22px;
   z-index: 1030;
+  width: 58px;
+  height: 58px;
   background: linear-gradient(135deg, var(--burg-l), var(--burg-d));
   color: #fff;
-  border: 1px solid var(--gold);
-  border-radius: 40px;
-  padding: 12px 26px;
-  font-weight: 500;
-  box-shadow: 0 10px 30px #000b;
-  display: none;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 14px rgba(212, 175, 106, 0.3);
+  cursor: pointer;
+  transition: all .25s ease;
+  padding: 0;
 }
 
-.cart-fab.show {
-  display: block;
+.cart-fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.8), 0 0 20px rgba(212, 175, 106, 0.6);
+  border-color: #fff;
+}
+
+.cart-fab i {
+  font-size: 1.45rem;
+  color: #fff;
+}
+
+.cart-fab .cart-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: var(--gold);
+  color: #000;
+  font-weight: 700;
+  font-size: 0.75rem;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--black);
 }
 
 .fab-waiter {

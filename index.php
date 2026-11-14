@@ -161,9 +161,10 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
   </div>
 </section>
 
-<!-- Cart button -->
-<button class="cart-fab" id="cartBtn" data-bs-toggle="offcanvas" data-bs-target="#cartDrawer">
-  <i class="bi bi-bag-fill"></i> <span id="cartCount">0</span> &middot; <span id="cartTotalBtn"><?= CURRENCY ?> 0</span>
+<!-- Floating Bag button -->
+<button class="cart-fab" id="cartBtn" data-bs-toggle="offcanvas" data-bs-target="#cartDrawer" title="View Cart">
+  <i class="bi bi-bag-fill"></i>
+  <span class="cart-badge" id="cartCount">0</span>
 </button>
 
 <!-- Cart drawer -->
