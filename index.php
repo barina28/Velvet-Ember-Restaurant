@@ -11,7 +11,7 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
 ?>
 
 <!-- ============ HERO (3D) ============ -->
-<section class="hero" style="background-image:url('<?= BASE ?>/assets/img/picture/hero.jpg')">
+<section class="hero" style="background-image:url('<?= $img('hero.jpg') ?>')">
   <div class="container">
     <div class="row align-items-center min-vh-100 pt-5">
       <div class="col-lg-6 text-center text-lg-start hero-text">
