@@ -44,12 +44,75 @@
       });
       card.addEventListener('mouseleave', () => { card.style.setProperty('--rx', '0deg'); card.style.setProperty('--ry', '0deg'); });
     });
+    /* ---------- 3D Deals Carousel (Cursor drag right to left & continuous movement) ---------- */
     const stage = $('#stage');
-    if (stage) {
-      document.addEventListener('mousemove', e => {
-        const x = e.clientX / innerWidth - .5, y = e.clientY / innerHeight - .5;
-        stage.style.transform = 'rotateX(' + (-y * 12) + 'deg) rotateY(' + (x * 18) + 'deg)';
-      });
+    const ring = $('#ring');
+
+    if (stage && ring) {
+      let currentAngle = 0;
+      let isDragging = false;
+      let startX = 0;
+      let previousAngle = 0;
+      let velocity = 0;
+      let lastX = 0;
+      let lastTime = 0;
+      const autoRotateSpeed = 0.3; // Continuous smooth rotation
+
+      function animate() {
+        if (!isDragging) {
+          if (Math.abs(velocity) > 0.05) {
+            currentAngle += velocity;
+            velocity *= 0.94; // natural deceleration
+          } else {
+            // Continously rotate naturally
+            currentAngle -= autoRotateSpeed;
+          }
+        }
+        ring.style.transform = `rotateY(${currentAngle}deg)`;
+        requestAnimationFrame(animate);
+      }
+      requestAnimationFrame(animate);
+
+      // Cursor Drag Interactions (Works with mouse and touch)
+      const onPointerDown = e => {
+        isDragging = true;
+        startX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        lastX = startX;
+        lastTime = performance.now();
+        previousAngle = currentAngle;
+        velocity = 0;
+      };
+
+      const onPointerMove = e => {
+        if (!isDragging) return;
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+        const deltaX = clientX - startX;
+        // Sensitivity for right-to-left cursor drag
+        currentAngle = previousAngle + deltaX * 0.45;
+
+        const now = performance.now();
+        const dt = now - lastTime;
+        if (dt > 10) {
+          velocity = ((clientX - lastX) / dt) * 3.5;
+          lastX = clientX;
+          lastTime = now;
+        }
+      };
+
+      const onPointerUp = () => {
+        if (!isDragging) return;
+        isDragging = false;
+        if (velocity > 12) velocity = 12;
+        if (velocity < -12) velocity = -12;
+      };
+
+      stage.addEventListener('mousedown', onPointerDown);
+      window.addEventListener('mousemove', onPointerMove);
+      window.addEventListener('mouseup', onPointerUp);
+
+      stage.addEventListener('touchstart', onPointerDown, { passive: true });
+      window.addEventListener('touchmove', onPointerMove, { passive: true });
+      window.addEventListener('touchend', onPointerUp);
     }
   }
 

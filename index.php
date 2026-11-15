@@ -6,7 +6,16 @@ $cats = q('SELECT * FROM categories ORDER BY sort_order, id')->fetchAll();
 $items = q('SELECT * FROM menu_items WHERE available = 1 ORDER BY id')->fetchAll();
 $byCat = [];
 foreach ($items as $i) $byCat[$i['category_id']][] = $i;
-$ring = array_slice($items, 0, 6);
+
+// Deals for 3D Carousel Showcase
+$dealsRing = [
+  ['id' => 'deal-1', 'name' => 'Royal Feast Combo', 'image' => 'deal-royal-feast.jpg', 'tag' => 'Save 25%', 'price' => 2450, 'price_label' => 'Rs. 2,450'],
+  ['id' => 'deal-2', 'name' => 'BBQ Platter Delight', 'image' => 'deal-bbq-platter.jpg', 'tag' => 'Popular', 'price' => 2199, 'price_label' => 'Rs. 2,199'],
+  ['id' => 'deal-3', 'name' => 'Dessert & Drink Pair', 'image' => 'deal-dessert-pair.jpg', 'tag' => 'Sweet Deal', 'price' => 850, 'price_label' => 'Rs. 850'],
+  ['id' => 'deal-4', 'name' => 'Grilled Tikka Combo', 'image' => 'deal-tikka-combo.jpg', 'tag' => 'Chef Special', 'price' => 1150, 'price_label' => 'Rs. 1,150'],
+  ['id' => 'deal-5', 'name' => 'Starters Party Pack', 'image' => 'deal-starters-pack.jpg', 'tag' => 'Value Pack', 'price' => 999, 'price_label' => 'Rs. 999'],
+  ['id' => 'deal-6', 'name' => 'Shahi Nihari Feast', 'image' => 'deal-nihari-feast.jpg', 'tag' => 'Weekend Special', 'price' => 1650, 'price_label' => 'Rs. 1,650'],
+];
 $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
 ?>
 
@@ -30,9 +39,15 @@ $img = fn($f) => BASE . '/assets/img/picture/' . rawurlencode($f);
       </div>
       <div class="col-lg-6">
         <div class="stage" id="stage">
-          <div class="ring">
-            <?php foreach ($ring as $n => $r): ?>
-              <div class="face" style="--i:<?= $n ?>"><img src="<?= $img($r['image']) ?>" alt="<?= e($r['name']) ?>"><span><?= e($r['name']) ?></span></div>
+          <div class="ring" id="ring">
+            <?php foreach ($dealsRing as $n => $r): ?>
+              <div class="face" style="--i:<?= $n ?>">
+                <span class="face-badge"><?= e($r['tag']) ?></span>
+                <img src="<?= $img($r['image']) ?>" alt="<?= e($r['name']) ?>" draggable="false">
+                <button type="button" class="deal-order-btn add-btn" data-id="<?= e($r['id']) ?>" data-name="<?= e($r['name']) ?>" data-price="<?= (float)$r['price'] ?>" title="Add to Cart">
+                  <i class="bi bi-cart-plus-fill"></i>
+                </button>
+              </div>
             <?php endforeach; ?>
           </div>
         </div>
